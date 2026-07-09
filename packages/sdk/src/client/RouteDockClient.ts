@@ -164,14 +164,15 @@ export class RouteDockClient {
     }
 
     let result: PaymentResult
+    const endpointKey = new URL(url).origin
 
     switch (mode) {
       case 'x402':
-        await this._checkSpendAllowed(manifest.pricing.x402?.amount, new URL(url).origin)
+        await this._checkSpendAllowed(manifest.pricing.x402?.amount, endpointKey)
         result = await this.x402.pay(url, manifest)
         break
       case 'mpp-charge':
-        await this._checkSpendAllowed(manifest.pricing['mpp-charge']?.amount, new URL(url).origin)
+        await this._checkSpendAllowed(manifest.pricing['mpp-charge']?.amount, endpointKey)
         result = await this.charge.pay(url, manifest)
         break
       case 'mpp-session':
@@ -182,7 +183,7 @@ export class RouteDockClient {
         throw new RouteDockManifestError(`Unknown payment mode: ${mode as string}`)
     }
 
-    await this._checkAndRecordSpend(result.amount, new URL(url).origin)
+    await this._checkAndRecordSpend(result.amount, endpointKey)
     return result
   }
 
@@ -447,3 +448,4 @@ export class RouteDockClient {
     return BigInt(current.totalMicros) + amountMicros <= capMicros
   }
 }
+
